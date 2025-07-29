@@ -4,39 +4,40 @@ import { uploadPDF } from "../../api/upload";
 
 export default function FileUploader({ onFileUpload }) {
   const [isDragging, setIsDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [uploading, setUploading]   = useState(false);
+  const [progress, setProgress]     = useState(0);
 
-  const handleUpload = useCallback(async (file) => {
-    if (!file || file.type !== "application/pdf") return;
-    setUploading(true);
-    try {
-      await uploadPDF(file, (pct) => setProgress(pct));
-      onFileUpload(file); 
-    } catch (err) {
-      console.error(err);
-      alert(`Upload failed: ${err.message}`);
-    } finally {
-      setUploading(false);
-      setProgress(0);
-    }
-  }, [onFileUpload]);
+  const handleUpload = useCallback(
+    async (file) => {
+      if (!file || file.type !== "application/pdf") return;
 
-  const handleFiles = useCallback((files) => {
-    handleUpload(files[0]);
-  }, [handleUpload]);
+      onFileUpload(file);
+
+      setUploading(true);
+      try {
+        await uploadPDF(file, pct => setProgress(pct));
+
+      } catch (err) {
+        console.error(err);
+        alert(`Upload failed: ${err.message}`);
+      } finally {
+        setProgress(0);
+        setUploading(false);
+      }
+    },
+    [onFileUpload]
+  );
+
+  const handleFiles = useCallback(
+    (files) => handleUpload(files[0]),
+    [handleUpload]
+  );
 
   const onInputChange = (e) => handleFiles(e.target.files);
 
-  const onDragOver = (e) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-  const onDragLeave = (e) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-  const onDrop = (e) => {
+  const onDragOver  = (e) => { e.preventDefault(); setIsDragging(true);  };
+  const onDragLeave = (e) => { e.preventDefault(); setIsDragging(false); };
+  const onDrop      = (e) => {
     e.preventDefault();
     setIsDragging(false);
     handleFiles(e.dataTransfer.files);
@@ -44,7 +45,9 @@ export default function FileUploader({ onFileUpload }) {
 
   return (
     <div
-      className={`flex items-center justify-center ${isDragging ? "bg-purple-50" : "bg-white"}`}
+      className={`flex items-center justify-center ${
+        isDragging ? "bg-purple-50" : "bg-white"
+      }`}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
@@ -83,7 +86,7 @@ export default function FileUploader({ onFileUpload }) {
                   ? "Drop your PDF here"
                   : "Click to select or drag your PDF here"}
               </p>
-              <p className="text-sm text-gray-400">Up to 100 MB</p>
+              <p className="text-sm text-gray-400">Up to 100MB</p>
             </div>
           </div>
         </label>
